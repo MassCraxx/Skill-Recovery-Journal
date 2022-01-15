@@ -8,7 +8,7 @@ function ISReadABook:update()
 	local journal = self.item
 
 	if journal:getType() == "SkillRecoveryJournal" then
-		---@type IsoGameCharacter | IsoPlayer
+        ---@type IsoGameCharacter | IsoPlayer | IsoMovingObject | IsoObject
 		local player = self.character
 
 		local journalModData = journal:getModData()
@@ -72,6 +72,9 @@ function ISReadABook:update()
 
 			for skill,xp in pairs(gainedXP) do
 				local currentXP = player:getXp():getXP(Perks[skill])
+				local bonusXP = SRJ.getFreeXPFromProfessionAndTraits(self.character)[skill] or 0
+				print(skill.." - subtracting "..bonusXP.."xp from traits and profession")
+				currentXP = currentXP - bonusXP
 
 				if currentXP < xp then
 					local readTimeMulti = SandboxVars.Character.ReadTimeMulti or 1
@@ -80,14 +83,15 @@ function ISReadABook:update()
 					if perkLevel == 11 then
 						perPerkXpRate=0
 					end
-					--print ("TESTING:  perPerkXpRate:"..perPerkXpRate.."  perkLevel:"..perkLevel.."  xpStored:"..xp.."  currentXP:"..currentXP)
+					print ("TESTING:  perPerkXpRate:"..perPerkXpRate.."  perkLevel:"..perkLevel.."  xpStored:"..xp.."  currentXP:"..currentXP)
 					if currentXP+perPerkXpRate > xp then
 						perPerkXpRate = (xp-(currentXP-0.01))
-						--print(" --xp overflowed, capped at:"..perPerkXpRate)
+						print(" --xp overflowed, capped at:"..perPerkXpRate)
 					end
 
 					if perPerkXpRate>0 then
-						player:getXp():AddXP(Perks[skill], perPerkXpRate)
+						--player:getXp():AddXP(Perks[skill], perPerkXpRate)
+						player:getXp():AddXP(Perks[skill], perPerkXpRate, true, true, false, true)
 						gainedXp = true
 						self:resetJobDelta()
 					end

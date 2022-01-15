@@ -1,4 +1,4 @@
-Events.OnGameBoot.Add(print("Skill Recovery Journal: ver:0.3.3-NewSandBoxSettings"))
+Events.OnGameBoot.Add(print("Skill Recovery Journal: ver:0.4-masscraxx-refactor"))
 
 SRJ = {}
 
@@ -28,22 +28,16 @@ end
 ---@param player IsoGameCharacter
 function SRJ.calculateGainedSkills(player)
 
-	local bonusLevels = {}
+	-- calc professtion skills
+	local bonusSkillLevels = SRJ.getFreeLevelsFromSkills(player)
 
-	---@type SurvivorDesc
-	local playerDesc = player:getDescriptor()
-	local descXpMap = transformIntoKahluaTable(playerDesc:getXPBoostMap())
-
-	for perk,level in pairs(descXpMap) do
-		local perky = tostring(perk)
-		local levely = tonumber(tostring(level))
-		bonusLevels[perky] = levely
-	end
+	--calc trait skills
+	local bonusTraitLevels = SRJ.getFreeLevelsFromTraits(player)
 
 	local gainedXP = {}
 	local storingSkills = false
 
-	--print("INFO: SkillRecoveryJournal: calculating gained skills:  total skills: "..Perks.getMaxIndex())
+	print("INFO: SkillRecoveryJournal: calculating gained skills:  total skills: "..Perks.getMaxIndex())
 	for i=1, Perks.getMaxIndex()-1 do
 		---@type PerkFactory.Perks
 		local perks = Perks.fromIndex(i)
@@ -54,17 +48,15 @@ function SRJ.calculateGainedSkills(player)
 				local currentXP = player:getXp():getXP(perk)
 				local perkType = tostring(perk:getType())
 
-				local bonusLevelsFromTrait = bonusLevels[perkType] or 0
+				local bonusLevels = (bonusSkillLevels[perkType] or 0) + (bonusTraitLevels[perkType] or 0)
 				local recoverableXPFactor = (SandboxVars.Character.RecoveryPercentage/100) or 1
 
-				local recoverableXP = currentXP
-
-				recoverableXP = math.floor(((recoverableXP-perk:getTotalXpForLevel(bonusLevelsFromTrait))*recoverableXPFactor)*1000)/1000
+				local recoverableXP = math.floor(((currentXP-perk:getTotalXpForLevel(bonusLevels))*recoverableXPFactor)*1000)/1000
 				if perkType == "Strength" or perkType == "Fitness" or recoverableXP==1 then
 					recoverableXP = 0
 				end
 
-				--print("  "..i.." "..perkType.." = "..tostring(recoverableXP).."xp  (current:"..currentXP.." - "..perk:getTotalXpForLevel(bonusLevelsFromTrait))
+				print("  "..i.." "..perkType.." = "..tostring(recoverableXP).."xp  (current:"..currentXP.." - "..perk:getTotalXpForLevel(bonusLevels))
 
 				if recoverableXP > 0 then
 					gainedXP[perkType] = recoverableXP
@@ -80,4 +72,70 @@ function SRJ.calculateGainedSkills(player)
 	end
 
 	return gainedXP
+end
+
+function SRJ.getFreeXPFromProfessionAndTraits(player)
+	local bonusXP = {}
+
+	-- calc professtion skills
+	local bonusSkillLevels = SRJ.getFreeLevelsFromSkills(player)
+
+	--calc trait skills
+	local bonusTraitLevels = SRJ.getFreeLevelsFromTraits(player)
+
+	-- convert to xp
+	for i=1, Perks.getMaxIndex()-1 do
+		local perks = Perks.fromIndex(i)
+		if perks then
+			---@type PerkFactory.Perk
+			local perk = PerkFactory.getPerk(perks)
+			if perk then
+				local perkString = tostring(perk:getType())
+				if bonusSkillLevels[perkString] or bonusTraitLevels[perkString] then
+					local bonusLevels = (bonusSkillLevels[perkString] or 0) + (bonusTraitLevels[perkString] or 0)
+					local initialXPforPerk = perk:getTotalXpForLevel(bonusLevels)
+					bonusXP[perkString] = initialXPforPerk
+					print("Initial xp for "..perkString..": "..initialXPforPerk)
+				end
+			end
+		end
+	end
+
+	return bonusXP
+end
+
+function SRJ.getFreeLevelsFromSkills(player)
+	local bonusLevels = {}
+
+	local playerDesc = player:getDescriptor()
+	local descXpMap = transformIntoKahluaTable(playerDesc:getXPBoostMap())
+
+	for perk,level in pairs(descXpMap) do
+		local perky = tostring(perk)
+		local levely = tonumber(tostring(level))
+		bonusLevels[perky] = levely
+	end
+
+	return bonusLevels
+end
+
+function SRJ.getFreeLevelsFromTraits(player)
+	local bonusLevels = {}
+	
+	local playerTraits = player:getTraits()
+	for i=0, playerTraits:size()-1 do
+		local trait = playerTraits:get(i)
+		---@type TraitFactory.Trait
+		local traitTrait = TraitFactory.getTrait(trait)
+
+		local traitXpMap = transformIntoKahluaTable(traitTrait:getXPBoostMap())
+
+		for perk,level in pairs(traitXpMap) do
+			local perky = tostring(perk)
+			local levely = tonumber(tostring(level))
+			bonusLevels[perky] = (bonusLevels[perky] or 0) + levely
+		end
+	end
+
+	return bonusLevels
 end
