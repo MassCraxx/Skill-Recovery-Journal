@@ -39,8 +39,8 @@ function ISCraftAction:update()
 				writing = false
 			end
 
-			local recoverableXP = SRJ.calculateGainedSkills(self.character)
-			if recoverableXP == nil then
+			local recoverableXP = self.gainedSkills
+			if not recoverableXP then
 				writing = false
 			end
 
@@ -56,7 +56,7 @@ function ISCraftAction:update()
 						gainedXP[skill] = gainedXP[skill] or 0
 						if xp > gainedXP[skill] then
 							--local xpAdd = math.floor((xp/self.maxTime)*1000)/1000
-							xpAdd = SandboxVars.Character.TranscribeSpeed or 1
+							xpAdd = SandboxVars.SkillRecoveryJournal.TranscribeSpeed or 1
 							print("TESTING: XP:"..xp.." gainedXP["..skill.."]:"..gainedXP[skill].." xpAdd:"..xpAdd)
 							--debug_text = debug_text.." adding:"..xpAdd
 							self.changesMade = true
@@ -107,7 +107,8 @@ function ISCraftAction:new(character, item, time, recipe, container, containers)
 		end
 
 		local recipeDiff = math.max(0, knownRecipesCount-storedRecipesCount)
-		local gainedSkills = SRJ.calculateGainedSkills(character) or false
+		o.gainedSkills = SRJ.calculateGainedSkills(character) or false
+		local gainedSkills = o.gainedSkills
 		o.willWrite = true
 		local sayText
 
@@ -149,7 +150,6 @@ function ISCraftAction:new(character, item, time, recipe, container, containers)
 
 		local xpDiff = 0
 		if o.willWrite then
-
 			JMD["author"] = character:getFullName()
 
 			for i=1, Perks.getMaxIndex()-1 do
@@ -178,11 +178,14 @@ function ISCraftAction:new(character, item, time, recipe, container, containers)
 					end
 				end
 			end
+
+			o.loopedAction = false
+			o.useProgressBar = false
+			o.maxTime = 1000
+			o.craftTimer = 0
+		else
+			o.maxTime = 0
 		end
-		
-		o.loopedAction = false
-		o.useProgressBar = false
-		o.craftTimer = 0
 	end
 
 	return o

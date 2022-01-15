@@ -67,25 +67,16 @@ function ISReadABook:update()
 					end
 				end
 
-				local XpMultiplier = SandboxVars.XpMultiplier or 1
-				local xpRate = (maxXP/100)/XpMultiplier
-
-				local minutesPerPage = 1
-				if isClient() then
-					minutesPerPage = getServerOptions():getFloat("MinutesPerPage") or 1
-				end
-				xpRate = minutesPerPage / minutesPerPage
-
 				for skill,xp in pairs(gainedXP) do
 					local currentXP = player:getXp():getXP(Perks[skill])
-					local bonusXP = SRJ.getFreeXPFromProfessionAndTraits(self.character)[skill] or 0
+					local bonusXP = self.initialXP[skill] or 0
 					print(skill.." - subtracting "..bonusXP.."xp from traits and profession")
 					currentXP = currentXP - bonusXP
 
 					if currentXP < xp then
-						local readTimeMulti = SandboxVars.Character.ReadTimeMulti or 1
+						local readTimeMulti = SandboxVars.SkillRecoveryJournal.ReadTimeMulti or 1
 						local perkLevel = player:getPerkLevel(Perks[skill])+1
-						local perPerkXpRate = math.floor(((xpRate*math.sqrt(perkLevel))*1000)/1000) * readTimeMulti
+						local perPerkXpRate = math.floor(((math.sqrt(perkLevel))*1000)/1000) * readTimeMulti
 						if perkLevel == 11 then
 							perPerkXpRate=0
 						end
@@ -108,8 +99,6 @@ function ISReadABook:update()
 					delayedStop = true
 					sayTextChoices = {"IGUI_PlayerText_KnowSkill","IGUI_PlayerText_BookObsolete"}
 					sayText = getText(sayTextChoices[ZombRand(#sayTextChoices)+1])
-					--else
-					--	self:resetJobDelta()
 				end
 			end
 
@@ -130,9 +119,10 @@ function ISReadABook:new(player, item, time)
 	local o = SRJOVERWRITE_ISReadABook_new(self, player, item, time)
 
 	if o and item:getType() == "SkillRecoveryJournal" then
+		o.initialXP = SRJ.getFreeXPFromProfessionAndTraits(player)
 		o.loopedAction = false
 		o.useProgressBar = false
-		o.maxTime = 100
+		o.maxTime = 1000
 		o.readTimer = 0
 
 		local journalModData = item:getModData()
