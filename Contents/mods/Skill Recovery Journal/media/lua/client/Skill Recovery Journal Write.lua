@@ -43,18 +43,26 @@ function ISCraftAction:update()
 		--local debug_text = "ISCraftAction:update - "
 
 		if writing and gainedXP then
+			local transcribing = false
 			for skill,xp in pairs(recoverableXP) do
 				if xp > 0 then
 					--debug_text = debug_text.." xp:"..xp
 					gainedXP[skill] = gainedXP[skill] or 0
 					if xp > gainedXP[skill] then
-						local xpAdd = math.floor((xp/self.maxTime)*1000)/1000
+						--local xpAdd = math.floor((xp/self.maxTime)*1000)/1000
+						xpAdd = SandboxVars.Character.TranscribeSpeed or 1
 						print("TESTING: XP:"..xp.." gainedXP["..skill.."]:"..gainedXP[skill].." xpAdd:"..xpAdd)
 						--debug_text = debug_text.." adding:"..xpAdd
 						self.changesMade = true
+						transcribing = true
 						gainedXP[skill] = math.min(xp, gainedXP[skill]+xpAdd)
+						self:resetJobDelta()
 					end
 				end
+			end
+			if not transcribing then
+				self:forceStop()
+                self.character:Say(getText("IGUI_PlayerText_AllDoneWithJournal"), 0.55, 0.55, 0.55, UIFont.Dialogue, 0, "default")
 			end
 		end
 		--print(debug_text)
@@ -163,10 +171,9 @@ function ISCraftAction:new(character, item, time, recipe, container, containers)
 				end
 			end
 		end
-		local transcribeSpeed = SandboxVars.Character.TranscribeSpeed or 1
-		if xpDiff>0 or recipeDiff>0 then
-			o.maxTime = o.maxTime + (((xpDiff) + (math.floor(math.sqrt(recipeDiff)+0.5)*50)) / transcribeSpeed)
-		end
+		
+		o.loopedAction = false
+		o.useProgressBar = false
 	end
 
 	return o
