@@ -20,52 +20,60 @@ function ISCraftAction:update()
 	SRJOVERWRITE_ISCraftAction_update(self)
 
 	if self.recipe and self.recipe:getOriginalname() == "Transcribe Journal" and self.item:getType() == "SkillRecoveryJournal" then
+		self.craftTimer = self.craftTimer + getGameTime():getMultiplier();
+		
+		-- normalize update time via in game time. Adjust updateInterval as needed
+		local updateInterval = 10
+		if self.craftTimer >= updateInterval then
+			self.craftTimer = 0
 
-		local journalModData = self.item:getModData()
-		journalModData["SRJ"] = journalModData["SRJ"] or {}
-		local JMD = journalModData["SRJ"]
-		local journalID = JMD["ID"]
-		local pSteamID = self.character:getSteamID()
+			local journalModData = self.item:getModData()
+			journalModData["SRJ"] = journalModData["SRJ"] or {}
+			local JMD = journalModData["SRJ"]
+			local journalID = JMD["ID"]
+			local pSteamID = self.character:getSteamID()
 
-		local writing = true
+			local writing = true
 
-		if pSteamID ~= 0 and journalID["steamID"] and (journalID["steamID"] ~= pSteamID) then
-			writing = false
-		end
+			if pSteamID ~= 0 and journalID["steamID"] and (journalID["steamID"] ~= pSteamID) then
+				writing = false
+			end
 
-		local recoverableXP = SRJ.calculateGainedSkills(self.character)
-		if recoverableXP == nil then
-			writing = false
-		end
+			local recoverableXP = SRJ.calculateGainedSkills(self.character)
+			if recoverableXP == nil then
+				writing = false
+			end
 
-		JMD["gainedXP"] = JMD["gainedXP"] or {}
-		local gainedXP = JMD["gainedXP"]
-		--local debug_text = "ISCraftAction:update - "
+			JMD["gainedXP"] = JMD["gainedXP"] or {}
+			local gainedXP = JMD["gainedXP"]
+			--local debug_text = "ISCraftAction:update - "
 
-		if writing and gainedXP then
-			local transcribing = false
-			for skill,xp in pairs(recoverableXP) do
-				if xp > 0 then
-					--debug_text = debug_text.." xp:"..xp
-					gainedXP[skill] = gainedXP[skill] or 0
-					if xp > gainedXP[skill] then
-						--local xpAdd = math.floor((xp/self.maxTime)*1000)/1000
-						xpAdd = SandboxVars.Character.TranscribeSpeed or 1
-						print("TESTING: XP:"..xp.." gainedXP["..skill.."]:"..gainedXP[skill].." xpAdd:"..xpAdd)
-						--debug_text = debug_text.." adding:"..xpAdd
-						self.changesMade = true
-						transcribing = true
-						gainedXP[skill] = math.min(xp, gainedXP[skill]+xpAdd)
-						self:resetJobDelta()
+			if writing and gainedXP then
+				local transcribing = false
+				for skill,xp in pairs(recoverableXP) do
+					if xp > 0 then
+						--debug_text = debug_text.." xp:"..xp
+						gainedXP[skill] = gainedXP[skill] or 0
+						if xp > gainedXP[skill] then
+							--local xpAdd = math.floor((xp/self.maxTime)*1000)/1000
+							xpAdd = SandboxVars.Character.TranscribeSpeed or 1
+							print("TESTING: XP:"..xp.." gainedXP["..skill.."]:"..gainedXP[skill].." xpAdd:"..xpAdd)
+							--debug_text = debug_text.." adding:"..xpAdd
+							self.changesMade = true
+							transcribing = true
+							gainedXP[skill] = math.min(xp, gainedXP[skill]+xpAdd)
+							self:resetJobDelta()
+						end
 					end
 				end
+				if not transcribing then
+					self:forceStop()
+        	        self.character:Say(getText("IGUI_PlayerText_AllDoneWithJournal"), 0.55, 0.55, 0.55, UIFont.Dialogue, 0, "default")
+					self.craftTimer = 0
+				end
 			end
-			if not transcribing then
-				self:forceStop()
-                self.character:Say(getText("IGUI_PlayerText_AllDoneWithJournal"), 0.55, 0.55, 0.55, UIFont.Dialogue, 0, "default")
-			end
+			--print(debug_text)
 		end
-		--print(debug_text)
 	end
 end
 
@@ -174,6 +182,7 @@ function ISCraftAction:new(character, item, time, recipe, container, containers)
 		
 		o.loopedAction = false
 		o.useProgressBar = false
+		o.craftTimer = 0
 	end
 
 	return o
