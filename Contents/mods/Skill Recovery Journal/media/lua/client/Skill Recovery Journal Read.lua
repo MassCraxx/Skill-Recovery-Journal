@@ -74,7 +74,7 @@ function ISReadABook:update()
 					currentXP = currentXP - bonusXP
 
 					if currentXP < xp then
-						local readTimeMulti = SandboxVars.SkillRecoveryJournal.ReadTimeMulti or 1
+						local readTimeMulti = SandboxVars.SkillRecoveryJournal.ReadSpeedMulti or 1
 						local perkLevel = player:getPerkLevel(Perks[skill])+1
 						local perPerkXpRate = math.floor(((math.sqrt(perkLevel))*1000)/1000) * readTimeMulti
 						if perkLevel == 11 then
