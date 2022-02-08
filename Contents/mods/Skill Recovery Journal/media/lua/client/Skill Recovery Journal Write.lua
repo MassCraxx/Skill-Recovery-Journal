@@ -70,6 +70,7 @@ function ISCraftAction:update()
 					self:forceStop()
         	        self.character:Say(getText("IGUI_PlayerText_AllDoneWithJournal"), 0.55, 0.55, 0.55, UIFont.Dialogue, 0, "default")
 					self.craftTimer = 0
+					SRJ.writtenJournal(false, self.item, self.character)
 				end
 			end
 			--print(debug_text)
@@ -218,6 +219,8 @@ function SRJ.writtenJournal(recipe, result, player)
 				oldJournal = recipe:get(i)
 			end
 		end
+	else
+		oldJournal = result;
 	end
 
 	---@type InventoryItem | Literature

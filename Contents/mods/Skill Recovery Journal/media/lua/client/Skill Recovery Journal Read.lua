@@ -53,7 +53,7 @@ function ISReadABook:update()
 					end
 				end
 
-				local gainedXP = JMD["gainedXP"]
+				local gainedXP = JMD["gainedXP"] or {}
 
 				local maxXP = 0
 
