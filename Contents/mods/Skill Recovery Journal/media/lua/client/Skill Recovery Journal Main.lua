@@ -1,4 +1,4 @@
-Events.OnGameBoot.Add(print("Skill Recovery Journal: ver:0.4-masscraxx-refactor"))
+Events.OnGameBoot.Add(print("Skill Recovery Journal: ver:0.4.1-masscraxx-refactor"))
 
 SRJ = {}
 
@@ -55,7 +55,7 @@ function SRJ.calculateGainedSkills(player)
 					recoverableXP = 0
 				end
 
-				print("  "..i.." "..perkType.." = "..tostring(recoverableXP).."xp  (current:"..currentXP.." - "..perk:getTotalXpForLevel(bonusLevels))
+				--print("  "..i.." "..perkType.." = "..tostring(recoverableXP).."xp  (current:"..currentXP.." - "..perk:getTotalXpForLevel(bonusLevels))
 
 				if recoverableXP > 0 then
 					gainedXP[perkType] = recoverableXP
@@ -94,7 +94,7 @@ function SRJ.getFreeXPFromProfessionAndTraits(player)
 					local bonusLevels = (bonusSkillLevels[perkString] or 0) + (bonusTraitLevels[perkString] or 0)
 					local initialXPforPerk = perk:getTotalXpForLevel(bonusLevels)
 					bonusXP[perkString] = initialXPforPerk
-					print("Initial xp for "..perkString..": "..initialXPforPerk.."->"..(bonusSkillLevels[perkString] or 0).."+"..(bonusTraitLevels[perkString] or 0))
+					--print("Initial xp for "..perkString..": "..initialXPforPerk.."->"..(bonusSkillLevels[perkString] or 0).."+"..(bonusTraitLevels[perkString] or 0))
 				end
 			end
 		end
