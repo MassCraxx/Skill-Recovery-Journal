@@ -112,9 +112,9 @@ function ISReadABook:update()
 						end
 					end
 					if #changesBeingMade>0 then
-						changesBeingMadeText = "Transcribing: "..changesBeingMadeText
+						changesBeingMadeText = "Learning: "..changesBeingMadeText
+						HaloTextHelper.addText(self.character, changesBeingMadeText, HaloTextHelper.getColorWhite())
 					end
-					HaloTextHelper.addText(self.character, changesBeingMadeText, HaloTextHelper.getColorWhite())
 				end
 			end
 

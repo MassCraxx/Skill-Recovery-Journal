@@ -91,8 +91,8 @@ function ISCraftAction:update()
 				end
 				if #changesBeingMade>0 then
 					changesBeingMadeText = "Transcribing: "..changesBeingMadeText
+					HaloTextHelper.addText(self.character, changesBeingMadeText, HaloTextHelper.getColorWhite())
 				end
-				HaloTextHelper.addText(self.character, changesBeingMadeText, HaloTextHelper.getColorWhite())
 			end
 			--print(debug_text)
 		end
