@@ -20,6 +20,7 @@ function ISCraftAction:update()
 	SRJOVERWRITE_ISCraftAction_update(self)
 
 	if self.recipe and self.recipe:getOriginalname() == "Transcribe Journal" and self.item:getType() == "SkillRecoveryJournal" then
+		self:resetJobDelta()
 		self.craftTimer = self.craftTimer + getGameTime():getMultiplier();
 		
 		-- normalize update time via in game time. Adjust updateInterval as needed
@@ -48,7 +49,7 @@ function ISCraftAction:update()
 			local gainedXP = JMD["gainedXP"]
 			--local debug_text = "ISCraftAction:update - "
 
-			if writing and gainedXP then
+			if writing and gainedXP and recoverableXP then
 				local transcribing = false
 				for skill,xp in pairs(recoverableXP) do
 					if xp > 0 then
@@ -57,12 +58,11 @@ function ISCraftAction:update()
 						if xp > gainedXP[skill] then
 							--local xpAdd = math.floor((xp/self.maxTime)*1000)/1000
 							xpAdd = SandboxVars.SkillRecoveryJournal.TranscribeSpeed or 1
-							print("TESTING: XP:"..xp.." gainedXP["..skill.."]:"..gainedXP[skill].." xpAdd:"..xpAdd)
+							--print("TESTING: XP:"..xp.." gainedXP["..skill.."]:"..gainedXP[skill].." xpAdd:"..xpAdd)
 							--debug_text = debug_text.." adding:"..xpAdd
 							self.changesMade = true
 							transcribing = true
 							gainedXP[skill] = math.min(xp, gainedXP[skill]+xpAdd)
-							self:resetJobDelta()
 						end
 					end
 				end
