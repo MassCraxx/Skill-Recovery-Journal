@@ -49,6 +49,8 @@ function ISCraftAction:update()
 			local gainedXP = JMD["gainedXP"]
 			--local debug_text = "ISCraftAction:update - "
 
+			local changesBeingMade = {}
+
 			if writing and gainedXP and recoverableXP then
 				local transcribing = false
 				for skill,xp in pairs(recoverableXP) do
@@ -62,7 +64,11 @@ function ISCraftAction:update()
 							--debug_text = debug_text.." adding:"..xpAdd
 							self.changesMade = true
 							transcribing = true
+							local old = gainedXP[skill]
 							gainedXP[skill] = math.min(xp, gainedXP[skill]+xpAdd)
+							if (gainedXP[skill] - old) >= xpAdd then
+								table.insert(changesBeingMade, skill)
+							end
 						end
 					end
 				end
@@ -72,6 +78,21 @@ function ISCraftAction:update()
 					self.craftTimer = 0
 					SRJ.writtenJournal(false, self.item, self.character)
 				end
+			end
+
+			-- show halo
+			if self.changesMade then
+				local changesBeingMadeText = ""
+				for k,v in pairs(changesBeingMade) do
+					changesBeingMadeText = changesBeingMadeText.." "..v
+					if k~=#changesBeingMade then
+						changesBeingMadeText = changesBeingMadeText..", "
+					end
+				end
+				if #changesBeingMade>0 then
+					changesBeingMadeText = "Transcribing: "..changesBeingMadeText
+				end
+				HaloTextHelper.addText(self.character, changesBeingMadeText, HaloTextHelper.getColorWhite())
 			end
 			--print(debug_text)
 		end

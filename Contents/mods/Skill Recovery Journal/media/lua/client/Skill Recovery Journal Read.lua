@@ -45,6 +45,7 @@ function ISReadABook:update()
 			end
 
 			if not delayedStop then
+				local changesBeingMade = {}
 
 				local learnedRecipes = JMD["learnedRecipes"] or {}
 				for recipeID,_ in pairs(learnedRecipes) do
@@ -90,6 +91,7 @@ function ISReadABook:update()
 							--player:getXp():AddXP(Perks[skill], perPerkXpRate)
 							player:getXp():AddXP(Perks[skill], perPerkXpRate, true, true, false, true)
 							gainedXp = true
+							table.insert(changesBeingMade, skill)
 						end
 					end
 				end
@@ -98,6 +100,21 @@ function ISReadABook:update()
 					delayedStop = true
 					sayTextChoices = {"IGUI_PlayerText_KnowSkill","IGUI_PlayerText_BookObsolete"}
 					sayText = getText(sayTextChoices[ZombRand(#sayTextChoices)+1])
+				end
+
+				-- show halo
+				if gainedXp then
+					local changesBeingMadeText = ""
+					for k,v in pairs(changesBeingMade) do
+						changesBeingMadeText = changesBeingMadeText.." "..v
+						if k~=#changesBeingMade then
+							changesBeingMadeText = changesBeingMadeText..", "
+						end
+					end
+					if #changesBeingMade>0 then
+						changesBeingMadeText = "Transcribing: "..changesBeingMadeText
+					end
+					HaloTextHelper.addText(self.character, changesBeingMadeText, HaloTextHelper.getColorWhite())
 				end
 			end
 
