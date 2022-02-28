@@ -89,7 +89,7 @@ function ISReadABook:update()
 
 						if perPerkXpRate>0 then
 							--player:getXp():AddXP(Perks[skill], perPerkXpRate)
-							player:getXp():AddXP(Perks[skill], perPerkXpRate, true, true, false, true)
+							player:getXp():AddXP(Perks[skill], perPerkXpRate, true, false, true)
 							gainedXp = true
 							table.insert(changesBeingMade, skill)
 						end
