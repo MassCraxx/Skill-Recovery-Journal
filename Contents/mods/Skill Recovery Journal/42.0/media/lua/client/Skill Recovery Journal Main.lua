@@ -185,8 +185,10 @@ end
 
 function SRJ.getReadXP(player)
 	local pMD = player:getModData()
-
-	pMD.recoveryJournalXpLog = pMD.recoveryJournalXpLog or {}
+	--pMD.recoveryJournalXpLog = pMD.recoveryJournalXpLog or {}
+	-- B42-MPFIX: PlayerModData is always cleared after restart
+	-- so instead fallback to return (all) currentXP as red to prevent overlearning:
+	pMD.recoveryJournalXpLog = pMD.recoveryJournalXpLog or SRJ.calculateGainedSkills(player, true) or {}
 	return pMD.recoveryJournalXpLog
 end
 
@@ -219,7 +221,7 @@ function SRJ.bSkillValid(perk)
 end
 
 
-function SRJ.calculateGainedSkills(player)
+function SRJ.calculateGainedSkills(player, all)
 
 	local gainedXP-- = {}
 	local deductibleXP = SRJ.setOrGetDeductedXP(player)
@@ -249,7 +251,14 @@ function SRJ.calculateGainedSkills(player)
 				local deductedXP = (SandboxVars.SkillRecoveryJournal.TranscribeTVXP==false) and deductibleXP[perkID] or 0
 				--if getDebug() then print(" -deductedXP:",deductedXP) end
 
-				local sandboxOptionRecover, recoveryPercentage = SRJ.bSkillValid(perk)
+				-- B42-MPFIX: we need the actual current xp raw
+				local sandboxOptionRecover = true 
+				local recoveryPercentage = 1
+
+				-- check config if we dont need all xp, but the recoverable amount instead
+				if not all then
+ 					sandboxOptionRecover, recoveryPercentage = SRJ.bSkillValid(perk)
+				end
 
 				local recoverableXP = sandboxOptionRecover and perkXP-(passiveFixXP or startingPerkXP)-deductedXP or 0
 				--if getDebug() then print(" -recoverableXP-deductions: ",recoverableXP) end

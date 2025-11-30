@@ -228,14 +228,18 @@ function ReadSkillRecoveryJournal:update()
 										addedFlatXP = oldXp[skill]
 										perPerkXpRate = math.max(0,perPerkXpRate-oldXp[skill])
 									end
-									player:getXp():AddXP(Perks[skill], addedFlatXP, false, false, true)
+									--player:getXp():AddXP(Perks[skill], addedFlatXP, false, false, true)
+									-- B42-MPFIX for DLMP 1.71: above will not sync to server, also boolean param in sendAddXp needs to be flipped...
+									sendAddXp(player, Perks[skill], addedFlatXP, false)
 								end
 								if perPerkXpRate > 0 then
 									----------------------------------------------------------------------------------------
 
 									---- perksType, XP, passHook, applyXPBoosts, transmitMP)
 									local addedXP = SRJ.xpHandler.reBoostXP(player,Perks[skill],perPerkXpRate)
-									player:getXp():AddXP(Perks[skill], addedXP, false, false, true)
+									--player:getXp():AddXP(Perks[skill], addedXP, false, false, true)
+									-- B42-MPFIX for DLMP 1.71: above will not sync to server, also boolean param in sendAddXp needs to be flipped...
+									sendAddXp(player, Perks[skill], addedXP, false)
 
 									----------------------------------------------------------------------------------------
 								end

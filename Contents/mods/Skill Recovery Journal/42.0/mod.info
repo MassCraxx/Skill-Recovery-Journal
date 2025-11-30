@@ -1,7 +1,7 @@
-name=Skill Recovery Journal
-id=SkillRecoveryJournal
+name=Skill Recovery Journal B42-MPFIX
+id=SkillRecoveryJournalB42-MPFIX
 description=Craft a journal which can transcribe (record) one's skill levels; later, when read, will recover those skill levels.
-description=
+description=(Edited to work for B42 Multiplayer - Death Legion mod)
 description=WARNING: If you're attempting to add this to an on-going save make sure to enable it under 'Load' > 'More...' >
 description=
 poster=poster.png
