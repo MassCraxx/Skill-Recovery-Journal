@@ -17,5 +17,6 @@ local function SkillRecoveryJournalRecipe()
     end
 end
 
-Events.OnInitWorld.Add(SkillRecoveryJournalRecipe)
-if isServer() then Events.OnGameBoot.Add(SkillRecoveryJournalRecipe) end
+-- B42-MPFIX disabled dynamic recipe to fix error on craft
+--Events.OnInitWorld.Add(SkillRecoveryJournalRecipe)
+--if isServer() then Events.OnGameBoot.Add(SkillRecoveryJournalRecipe) end
